@@ -49,4 +49,28 @@ public class UsuarioController : ControllerBase
         var result = await _usuarioService.AddAsync(request);
         return Ok(result);
     }
+    
+    [HttpPut]
+    public async Task<IActionResult> EditarUsuario(UsuarioEditarRequest request)
+    {
+        var usuarios = await _usuarioService.UpdateAsync(request);
+
+        if (usuarios.Status == false)
+        {
+            return BadRequest(usuarios);
+        }
+
+        return Ok(usuarios);
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var usuarios = await _usuarioService.DeleteAsync(id);
+        if (usuarios.Status == false)
+        {
+            return BadRequest(usuarios);
+        }
+        return Ok(usuarios);
+    }
 }

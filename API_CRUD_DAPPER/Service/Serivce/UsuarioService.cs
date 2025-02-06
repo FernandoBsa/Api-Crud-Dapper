@@ -98,6 +98,56 @@ public class UsuarioService : IUsuarioService
             throw new Exception(e.Message);
         }
     }
-    
-    
+
+    public async Task<ResponseModel<UsuarioListarDTO>> UpdateAsync(UsuarioEditarRequest request)
+    {
+        try
+        {
+            ResponseModel<UsuarioListarDTO> response = new ResponseModel<UsuarioListarDTO>();
+
+            var usuariosBanco = await _repository.UpdateAsync(request);
+            if(usuariosBanco == null)
+            {
+                response.Mensagem = "Ocorreu um erro ao realizar a edição!";
+                response.Status = false;
+                return response;
+            }
+
+            var usuarioDTO = _mapper.Map<UsuarioListarDTO>(usuariosBanco);
+
+            response.Dados = usuarioDTO;
+            response.Mensagem = "Usuarios listados com sucesso";
+            return response;
+        }
+        catch (Exception e)
+        {
+            throw new Exception(e.Message);
+        }
+    }
+
+    public async Task<ResponseModel<List<UsuarioListarDTO>>> DeleteAsync(Guid id)
+    {
+        try
+        {
+            ResponseModel<List<UsuarioListarDTO>> response = new ResponseModel<List<UsuarioListarDTO>> ();
+
+            var usuariosBanco = await _repository.DeleteAsync(id);
+            if(usuariosBanco == null)
+            {
+                response.Mensagem = "Ocorreu um erro ao realizar o delete!";
+                response.Status = false;
+                return response;
+            }
+
+            var usuarioDTO = _mapper.Map<List<UsuarioListarDTO>>(usuariosBanco);
+
+            response.Dados = usuarioDTO;
+            response.Mensagem = "Usuarios listados com sucesso";
+            return response;
+        }
+        catch (Exception e)
+        {
+            throw new Exception(e.Message);
+        }
+    }
 }

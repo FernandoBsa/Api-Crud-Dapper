@@ -7,7 +7,7 @@ namespace Data.Repository;
 
 public class UsuarioRepository : IUsuarioRepository
 {
-    private readonly IGenericRepository _repository; 
+    private readonly IGenericRepository _repository;
  
     public UsuarioRepository(IGenericRepository repository)
     {
@@ -33,7 +33,7 @@ public class UsuarioRepository : IUsuarioRepository
     public async Task<Usuario> AddAsync(UsuarioRequest request)
     {
         var sql = @"INSERT INTO USUARIOS(ID, NOMECOMPLETO, EMAIL, CPF, SENHA, SITUATION, USERTYPE)
-                VALUES (:id, :nomecompleto, :email, :cpf, :senha, :situation, :usertype) RETURNING *";
+                VALUES (:id, :nomecompleto, :email, :cpf, :senha, :situation, :usertype)";
 
         Dictionary<string, object> parametros = new Dictionary<string, object>
         {
@@ -45,8 +45,44 @@ public class UsuarioRepository : IUsuarioRepository
             {"situation", request.Situation},
             {"usertype", request.UserType}
         };
+        
+        await _repository.ExecuteAsync(sql, parametros);
 
-        var usuario = await _repository.GetById<Usuario>(sql, parametros);
-        return usuario;
-    } 
+        return await _repository.GetById<Usuario>("SELECT * FROM USUARIOS WHERE ID = :id", new { id = parametros["id"]});
+    }
+
+    public async Task<Usuario> UpdateAsync(UsuarioEditarRequest request)
+    {
+        var sql = @"UPDATE USUARIOS SET NOMECOMPLETO = :nomecompleto, EMAIL = :email, CPF = :cpf, SENHA = :senha, SITUATION = :situation, 
+                    USERTYPE = :usertype WHERE ID = :id";
+
+        Dictionary<string, object> parametros = new Dictionary<string, object>
+        {
+            {"id", request.Id},
+            {"nomecompleto", request.NomeCompleto},
+            {"email", request.Email},
+            {"cpf", request.CPF},
+            {"senha", request.Senha},
+            {"situation", request.Situation},
+            {"usertype", request.UserType}
+        };
+
+        await _repository.ExecuteAsync(sql, parametros);
+
+        return await _repository.GetById<Usuario>("SELECT * FROM USUARIOS WHERE ID = :id",new { id = parametros["id"] });
+    }
+
+    public async Task<List<Usuario>> DeleteAsync(Guid id)
+    {
+        var sql = @"DELETE FROM usuarios WHERE ID = :id";
+        Dictionary<string, object> parametros = new Dictionary<string, object>
+        {
+            { "id", id }
+        };
+        await _repository.ExecuteAsync(sql, parametros);
+        
+        var result = await _repository.QueryAsync<Usuario>("SELECT * FROM usuarios");
+        
+        return result.ToList();
+    }
 }
