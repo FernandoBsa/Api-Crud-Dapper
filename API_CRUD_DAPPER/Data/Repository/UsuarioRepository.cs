@@ -65,9 +65,16 @@ public class UsuarioRepository : IUsuarioRepository
                 {"usertype", request.UserType}
             };
         
-            await _repository.ExecuteAsync(sql, parametros);
-            
-            return usuarioGuid;
+            var linhasAfetadas = await _repository.ExecuteAsync(sql, parametros);
+       
+            if (linhasAfetadas > 0)
+            {
+                return usuarioGuid;
+            }
+            else
+            {
+                return Guid.Empty; 
+            }
         }
         catch (NpgsqlException ex)
         {
