@@ -24,20 +24,20 @@ public class UsuarioService : IUsuarioService
         try
         {
             ResponseModel<UsuarioListarDTO> response = new ResponseModel<UsuarioListarDTO>();
-            var novoUsuario = await _repository.AddAsync(request);
+            var usuarioGuid = await _repository.AddAsync(request);
 
-            if (novoUsuario == null)
+            if (usuarioGuid == Guid.Empty)
             {
                 response.Mensagem = "Ocorreu um erro ao realizar o registro!";
                 response.Status = false;
                 return response;
             }
             
-            
-            var usuario = _mapper.Map<UsuarioListarDTO>(novoUsuario);
-            
-            response.Dados = usuario;
-            response.Mensagem = "Usuarios localizados com sucesso";
+            var usuario = await _repository.GetByIdAsync(usuarioGuid);
+            var usuarioDto = _mapper.Map<UsuarioListarDTO>(usuario);
+
+            response.Dados = usuarioDto;
+            response.Mensagem = "Usuario criado com sucesso";
             return response;
             
         }
@@ -86,11 +86,11 @@ public class UsuarioService : IUsuarioService
                 response.Status = false;
                 return response;
             }
-
+            
             var usuarioDTO = _mapper.Map<UsuarioListarDTO>(usuariosBanco);
 
             response.Dados = usuarioDTO;
-            response.Mensagem = "Usuarios localizados com sucesso";
+            response.Mensagem = "Usuario localizado com sucesso";
             return response;
         }
         catch (Exception e)
@@ -105,18 +105,19 @@ public class UsuarioService : IUsuarioService
         {
             ResponseModel<UsuarioListarDTO> response = new ResponseModel<UsuarioListarDTO>();
 
-            var usuariosBanco = await _repository.UpdateAsync(request);
-            if(usuariosBanco == null)
+            var usuario = await _repository.UpdateAsync(request);
+            if(usuario == 0)
             {
                 response.Mensagem = "Ocorreu um erro ao realizar a edição!";
                 response.Status = false;
                 return response;
             }
-
-            var usuarioDTO = _mapper.Map<UsuarioListarDTO>(usuariosBanco);
+            
+            var novoUsuario = await _repository.GetByIdAsync(request.Id);
+            var usuarioDTO = _mapper.Map<UsuarioListarDTO>(novoUsuario);
 
             response.Dados = usuarioDTO;
-            response.Mensagem = "Usuarios listados com sucesso";
+            response.Mensagem = "Usuarios editado com sucesso";
             return response;
         }
         catch (Exception e)
@@ -132,17 +133,18 @@ public class UsuarioService : IUsuarioService
             ResponseModel<List<UsuarioListarDTO>> response = new ResponseModel<List<UsuarioListarDTO>> ();
 
             var usuariosBanco = await _repository.DeleteAsync(id);
-            if(usuariosBanco == null)
+            if(usuariosBanco == 0)
             {
                 response.Mensagem = "Ocorreu um erro ao realizar o delete!";
                 response.Status = false;
                 return response;
             }
-
-            var usuarioDTO = _mapper.Map<List<UsuarioListarDTO>>(usuariosBanco);
+            
+            var usuarios = await _repository.GetAllAsync();
+            var usuarioDTO = _mapper.Map<List<UsuarioListarDTO>>(usuarios);
 
             response.Dados = usuarioDTO;
-            response.Mensagem = "Usuarios listados com sucesso";
+            response.Mensagem = "Usuarios removido com sucesso";
             return response;
         }
         catch (Exception e)
